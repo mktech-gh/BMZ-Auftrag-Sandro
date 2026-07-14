@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Baumaschinen-Werkstatt</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#22262B">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BM-Werkstatt">
+
+<style>
+  :root{
+    --bg:#F4F5F7;
+    --surface:#FFFFFF;
+    --surface-2:#FAFAFB;
+    --ink:#191B1F;
+    --ink-soft:#6B7280;
+    --ink-faint:#9AA1AC;
+    --line:#E8E9EC;
+    --accent:#FF5A1F;
+    --accent-2:#FF7A45;
+    --accent-soft:#FFF1EA;
+    --amber:#E2A030;
+    --amber-soft:#FDF3E2;
+    --green:#1FA971;
+    --green-soft:#E6F7F0;
+    --danger:#E5484D;
+    --danger-soft:#FDECEC;
+    --shadow-sm: 0 1px 2px rgba(20,20,30,.04), 0 1px 1px rgba(20,20,30,.03);
+    --shadow-md: 0 2px 8px rgba(20,20,30,.06), 0 8px 24px rgba(20,20,30,.05);
+    --shadow-lg: 0 12px 32px rgba(20,20,30,.14);
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:10px;
+    --font-display: -apple-system, "SF Pro Display", "Segoe UI", Inter, Roboto, Arial, sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Courier New", monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--ink); font-family:var(--font-body); min-height:100vh; -webkit-tap-highlight-color:transparent; overscroll-behavior-y:none; -webkit-font-smoothing:antialiased; }
+  #app{ min-height:100vh; padding:0 0 76px 0; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  .topbar{
+    background:rgba(25,27,31,0.92);
+    -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+    color:#fff; padding:max(16px, env(safe-area-inset-top)) 20px 16px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    position:sticky; top:0; z-index:20;
+  }
+  .brand{ font-family:var(--font-display); font-weight:700; letter-spacing:-.01em; font-size:18px; display:flex; align-items:center; gap:10px; line-height:1.1; }
+  .brand-mark{ width:32px; height:32px; border-radius:10px; background:linear-gradient(135deg, var(--accent), #FF3D71); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0; box-shadow:0 4px 12px rgba(255,90,31,.35); }
+  .brand-text{ display:flex; flex-direction:column; }
+  .brand small{ font-weight:400; letter-spacing:0; color:rgba(255,255,255,.55); font-size:11.5px; margin-top:1px; }
+
+  .btn{ font-family:var(--font-body); font-weight:600; font-size:14px; border:none; border-radius:999px; padding:11px 20px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:transform .12s ease, box-shadow .15s ease, filter .15s ease, background .15s ease; }
+  .btn:active{ transform:scale(.96); }
+  .btn-accent{ background:linear-gradient(135deg, var(--accent), #FF3D71); color:#fff; box-shadow:0 4px 14px rgba(255,90,31,.32); }
+  .btn-accent:hover{ filter:brightness(1.05); box-shadow:0 6px 18px rgba(255,90,31,.4); }
+  .btn-ghost{ background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.16); }
+  .btn-ghost:hover{ background:rgba(255,255,255,.14); }
+  .btn-outline{ background:var(--surface); color:var(--ink); border:1.5px solid var(--line); }
+  .btn-outline:hover{ border-color:var(--ink-faint); background:var(--surface-2); }
+  .btn-danger{ background:var(--danger-soft); color:var(--danger); border:none; }
+  .btn-danger:hover{ filter:brightness(0.97); }
+  .btn-sm{ padding:8px 14px; font-size:13px; }
+  .btn-block{ width:100%; justify-content:center; border-radius:16px; }
+  .wrap{ max-width:980px; margin:0 auto; padding:22px 16px; }
+
+  .toolbar{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center; }
+  .search{ flex:1; min-width:200px; padding:13px 16px; border:none; border-radius:14px; background:var(--surface); box-shadow:var(--shadow-sm); font-size:15px; color:var(--ink); }
+  .search::placeholder{ color:var(--ink-faint); }
+  .search:focus{ outline:none; box-shadow:0 0 0 3px var(--accent-soft), var(--shadow-sm); }
+
+  .segmented{ display:inline-flex; gap:2px; padding:3px; background:var(--surface); border-radius:999px; box-shadow:var(--shadow-sm); }
+  .filter-chip{ padding:9px 14px; border-radius:999px; border:none; background:transparent; font-size:13px; font-weight:600; cursor:pointer; color:var(--ink-soft); transition:background .15s ease, color .15s ease; }
+  .filter-chip.active{ background:var(--ink); color:#fff; }
+
+  .empty{ text-align:center; padding:64px 20px; color:var(--ink-soft); border-radius:var(--radius-lg); background:var(--surface); box-shadow:var(--shadow-sm); }
+  .empty .big{ font-family:var(--font-display); font-size:22px; font-weight:700; color:var(--ink); margin-bottom:8px; letter-spacing:-.01em; }
+
+  .ticket{ position:relative; background:var(--surface); border:none; border-radius:var(--radius-lg); margin-bottom:12px; padding:18px 20px; cursor:pointer; box-shadow:var(--shadow-sm); transition:box-shadow .18s ease, transform .18s ease; }
+  .ticket:hover{ box-shadow:var(--shadow-md); transform:translateY(-2px); }
+  .ticket::before{ display:none; }
+  .ticket-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:6px; }
+  .ticket-id{ font-family:var(--font-mono); font-size:11.5px; color:var(--ink-faint); letter-spacing:.02em; }
+  .ticket-firma{ font-family:var(--font-display); font-weight:700; font-size:17px; letter-spacing:-.01em; color:var(--ink); }
+  .ticket-meta{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+  .ticket-assignee{ display:inline-flex; font-size:12px; font-weight:600; color:var(--ink-soft); margin-top:6px; background:var(--surface-2); padding:3px 9px; border-radius:999px; }
+  .stamp{ font-family:var(--font-body); font-weight:700; font-size:11.5px; letter-spacing:.01em; border:none; border-radius:999px; padding:6px 12px; transform:none; white-space:nowrap; flex-shrink:0; }
+  .stamp.offen{ color:var(--accent); background:var(--accent-soft); }
+  .stamp.arbeit{ color:var(--amber); background:var(--amber-soft); }
+  .stamp.fertig{ color:var(--green); background:var(--green-soft); }
+  .ticket-progress{ font-size:12.5px; color:var(--ink-faint); margin-top:10px; font-family:var(--font-mono); padding-top:10px; border-top:1px solid var(--line); }
+
+  .fab{ position:fixed; right:20px; bottom:20px; z-index:30; box-shadow:var(--shadow-lg); padding:16px 24px; }
+
+  .section{ background:var(--surface); border:none; border-radius:var(--radius-lg); margin-bottom:18px; overflow:hidden; box-shadow:var(--shadow-sm); }
+  .section-head{ display:flex; align-items:center; gap:10px; padding:18px 22px; background:var(--surface); border-bottom:1px solid var(--line); }
+  .section-num{ font-family:var(--font-body); font-weight:700; color:#fff; background:linear-gradient(135deg, var(--accent), #FF3D71); font-size:12.5px; width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .section-title{ font-family:var(--font-display); font-weight:700; letter-spacing:-.01em; font-size:16.5px; color:var(--ink); }
+  .section-body{ padding:22px; }
+  .subhead{ font-family:var(--font-body); font-weight:700; font-size:12.5px; letter-spacing:.03em; text-transform:uppercase; color:var(--ink-faint); margin:24px 0 12px; }
+  .subhead:first-child{ margin-top:0; }
+
+  .grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  @media (max-width:640px){ .grid{ grid-template-columns:1fr; } }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:640px){ .grid3{ grid-template-columns:1fr 1fr; } }
+
+  label{ display:block; font-size:12px; font-weight:600; letter-spacing:.01em; color:var(--ink-soft); margin-bottom:6px; }
+  input[type=text], input[type=tel], input[type=email], input[type=date], input[type=number], textarea, select{
+    width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:15px; font-family:var(--font-body); background:var(--surface-2); color:var(--ink); transition:border-color .15s ease, background .15s ease;
+  }
+  input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--accent); background:var(--surface); box-shadow:0 0 0 3px var(--accent-soft); }
+  textarea{ resize:vertical; min-height:70px; }
+  .field{ margin-bottom:14px; }
+  .radio-row{ display:flex; gap:18px; flex-wrap:wrap; padding-top:4px; }
+  .radio-opt{ display:flex; align-items:center; gap:8px; font-size:15px; font-weight:500; cursor:pointer; color:var(--ink); }
+  .radio-opt input{ width:19px; height:19px; accent-color:var(--accent); }
+  .inline-date-choice{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .inline-date-choice input[type=date]{ max-width:180px; }
+
+  .status-bar{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; background:var(--surface); padding:6px; border-radius:16px; box-shadow:var(--shadow-sm); }
+  .status-btn{ flex:1; min-width:110px; padding:12px; border-radius:12px; border:none; background:transparent; font-weight:700; font-family:var(--font-body); font-size:13.5px; cursor:pointer; color:var(--ink-soft); transition:background .15s ease, color .15s ease; }
+  .status-btn.sel-offen.selected{ color:var(--accent); background:var(--accent-soft); }
+  .status-btn.sel-arbeit.selected{ color:var(--amber); background:var(--amber-soft); }
+  .status-btn.sel-fertig.selected{ color:var(--green); background:var(--green-soft); }
+
+  .detail-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:10px; flex-wrap:wrap; }
+  .back-link{ background:var(--surface); box-shadow:var(--shadow-sm); border:none; color:var(--ink); font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:6px; padding:10px 16px; border-radius:999px; }
+  .actions-row{ display:flex; gap:10px; flex-wrap:wrap; }
+
+  .checklist-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  @media (max-width:800px){ .checklist-grid{ grid-template-columns:repeat(2,1fr); } }
+  .check-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; font-size:13.5px; cursor:pointer; border-radius:10px; transition:background .15s ease; }
+  .check-item:hover{ background:var(--surface-2); }
+  .check-item input{ width:18px; height:18px; accent-color:var(--accent); flex-shrink:0; }
+  .check-item.checked{ font-weight:700; color:var(--ink); background:var(--accent-soft); }
+  .check-item span{ line-height:1.25; }
+  .custom-check-item{ display:flex; align-items:center; gap:8px; padding:6px 4px; }
+  .custom-check-item input[type=checkbox]{ width:18px; height:18px; accent-color:var(--accent); flex-shrink:0; }
+  .custom-check-item input[type=text]{ padding:9px 12px; font-size:13.5px; }
+
+  table.rows{ width:100%; border-collapse:collapse; margin-bottom:10px; }
+  table.rows th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-faint); font-weight:700; padding:8px 6px; border-bottom:1.5px solid var(--line); }
+  table.rows td{ padding:6px 4px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  table.rows input{ padding:9px 10px; font-size:14px; }
+  .row-del{ background:var(--danger-soft); border:none; color:var(--danger); font-size:17px; line-height:1; cursor:pointer; padding:7px 10px; border-radius:8px; }
+  .add-row-btn{ margin-top:6px; }
+  .total-line{ display:flex; justify-content:flex-end; gap:16px; padding:12px 4px 2px; font-size:14px; color:var(--ink-soft); }
+  .total-line b{ font-size:17px; color:var(--ink); font-family:var(--font-display); }
+  .table-scroll{ overflow-x:auto; }
+
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:13px 22px; border-radius:999px; font-size:14px; font-weight:600; z-index:50; box-shadow:var(--shadow-lg); opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease; max-width:88vw; text-align:center; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(-2px); }
+
+  .install-banner{ background:var(--accent-soft); border:none; border-radius:16px; padding:14px 16px; margin-bottom:16px; font-size:13.5px; color:var(--ink); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .install-banner button{ flex-shrink:0; }
+
+  @media screen{ #printView{ display:none !important; } }
+
+  @media print{
+    @page{ size:A4; margin:14mm 12mm; }
+    html,body{ background:#fff !important; }
+    #app{ display:none !important; }
+    #printView{ display:block !important; color:#000; font-family:var(--font-body); }
+    .pv-page{ break-after:page; }
+    .pv-page:last-child{ break-after:auto; }
+    .pv-masthead{ display:flex; justify-content:space-between; align-items:baseline; border-bottom:2px solid #000; padding-bottom:6px; margin-bottom:12px; }
+    .pv-masthead h1{ font-size:16px; margin:0; font-weight:800; letter-spacing:-.01em; }
+    .pv-masthead .pv-meta{ font-family:var(--font-mono); font-size:11px; text-align:right; color:#333; }
+    .pv-status{ display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; border:1px solid #000; border-radius:3px; padding:2px 7px; margin-top:3px; }
+    .pv-section-title{ font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; margin:13px 0 6px; padding-bottom:3px; border-bottom:1px solid #999; }
+    .pv-section-title:first-of-type{ margin-top:0; }
+    .pv-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:7px 18px; margin-bottom:4px; }
+    .pv-grid.pv-cols2{ grid-template-columns:repeat(2,1fr); }
+    .pv-field{ border-bottom:1px solid #bbb; padding-bottom:3px; break-inside:avoid; }
+    .pv-label{ font-size:8.5px; text-transform:uppercase; letter-spacing:.04em; color:#666; }
+    .pv-value{ font-size:12.5px; padding-top:2px; min-height:14px; word-break:break-word; }
+    .pv-text-block{ border:1px solid #ccc; border-radius:4px; padding:6px 9px; font-size:11.5px; white-space:pre-wrap; min-height:16px; margin-bottom:3px; }
+    .pv-checklist{ column-count:4; column-gap:14px; font-size:10px; margin-bottom:3px; }
+    .pv-check-item{ break-inside:avoid; display:flex; align-items:baseline; gap:5px; padding:1px 0; }
+    .pv-check-box{ font-family:var(--font-mono); font-size:12px; flex-shrink:0; }
+    .pv-check-item.pv-checked{ font-weight:700; }
+    .pv-table{ width:100%; border-collapse:collapse; font-size:10.5px; margin-bottom:4px; }
+    .pv-table th{ text-align:left; font-size:9px; text-transform:uppercase; letter-spacing:.02em; color:#333; border-bottom:1px solid #000; padding:3px 6px; }
+    .pv-table td{ padding:3px 6px; border-bottom:1px solid #ccc; }
+    .pv-table tfoot td{ border-top:1.5px solid #000; border-bottom:none; font-weight:700; padding-top:6px; }
+    .pv-footer{ margin-top:16px; padding-top:8px; border-top:1px solid #999; font-size:9px; color:#666; display:flex; justify-content:space-between; }
+    .pv-empty-note{ font-size:11px; color:#777; font-style:italic; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="printView"></div>
+<input type="file" id="importFile" accept="application/json" style="display:none">
+
+<script>
+(function(){
+  const STORAGE_KEY = "bm-werkstatt-jobs-v2";
+  const MITARBEITER_KEY = "bm-werkstatt-mitarbeiter";
+  let jobs = [];
+  let mitarbeiterListe = [];
+  let currentView = "list";
+  let currentJobId = null;
+  let searchTerm = "";
+  let statusFilter = "all";
+  let mitarbeiterFilter = "all";
+  let showMitarbeiterPanel = false;
+  let deferredInstallPrompt = null;
+  let showInstallBanner = false;
+
+  const app = document.getElementById("app");
+
+  const CHECKLIST_ITEMS = [
+    "Abgaswartung","Batterie k. / ers.","Beleuchtung","Bremsflüssigkeit","Bremsklötze v / h","Bremsscheibe v / h","Fehlerspeicher","Funktionskontrolle",
+    "Getriebeöl k. / ers.","Handbremse","Hydr.-Schlauch Service","Keilriemen k. / ers.","Klimaservice","Kondenswasser","Licht einstellen","Materialbezug",
+    "MFK","Niveau kontr.","Ölverlust","Plasma CNC","Reifen rep.","Reifendruck","Reifenservice v / h","Reinigung g / k",
+    "Service g / k","Ventilspiel","Verschraubungen","Wischerblätter"
+  ];
+  const CUSTOM_CHECK_SLOTS = 4;
+
+  const MATERIAL_CATALOG = {
+    "Filter": ["Motorölfilter","Hydraulikölfilter","Kraftstofffilter","Luftfilter","Kabinenfilter","Getriebeölfilter"],
+    "Öle & Flüssigkeiten": ["Motoröl 15W-40","Hydrauliköl","Getriebeöl","Achsöl","Kühlflüssigkeit","Bremsflüssigkeit","Schmierfett"],
+    "Verschleissteile": ["Keilriemen","Zahnriemen","Batterie","Glühkerze","Zündkerze","Bremsbeläge","Bremsscheibe","Scheibenwischerblätter","Dichtungssatz","Simmerring","Lager","Reifen"]
+  };
+
+  function uid(prefix){ return prefix + "-" + Date.now().toString(36).toUpperCase() + Math.floor(Math.random()*90+10); }
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+  function blankJob(){
+    const checkliste = {};
+    CHECKLIST_ITEMS.forEach(k => checkliste[k] = false);
+    return {
+      id: uid("A"),
+      createdAt: new Date().toISOString(),
+      status: "offen",
+      kunde: { firma:"", kontakt:"", strasse:"", tel:"", ort:"", email:"" },
+      zuErledigen: { mode:"bis", datum:"" },
+      annahmeVon: "",
+      zugewiesenAn: "",
+      maschine: { art:"", inventarNr:"", marke:"", betriebsStd:"", typ:"", baujahr:"", chassisNr:"", kontrollschild:"", standort:"" },
+      arbeitenAuszufuehren: "",
+      bemerkungenAnnahme: "",
+      checkliste: checkliste,
+      customChecks: Array.from({length:CUSTOM_CHECK_SLOTS}, ()=>({label:"", checked:false})),
+      weitereArbeiten: "",
+      zeittabelle: [ {datum:"", total:"", monteur:"", km:"", ahk:""} ],
+      material: [ {stk:"", beschreibung:"", ersatzteilNr:"", preis:""} ],
+      bemerkungAuftrag: ""
+    };
+  }
+
+  function loadJobs(){
+    try{ const raw = localStorage.getItem(STORAGE_KEY); jobs = raw ? JSON.parse(raw) : []; }
+    catch(e){ jobs = []; }
+    jobs.forEach(j=>{
+      if(!j.checkliste) j.checkliste = {};
+      CHECKLIST_ITEMS.forEach(k=>{ if(typeof j.checkliste[k]==="undefined") j.checkliste[k]=false; });
+      if(!Array.isArray(j.customChecks)) j.customChecks = Array.from({length:CUSTOM_CHECK_SLOTS}, ()=>({label:"", checked:false}));
+      if(!Array.isArray(j.zeittabelle)) j.zeittabelle = [{datum:"", total:"", monteur:"", km:"", ahk:""}];
+      if(!Array.isArray(j.material)) j.material = [];
+      if(!j.zuErledigen) j.zuErledigen = {mode:"bis", datum:""};
+      if(typeof j.zugewiesenAn === "undefined") j.zugewiesenAn = "";
+    });
+  }
+  function loadMitarbeiter(){
+    try{ const raw = localStorage.getItem(MITARBEITER_KEY); mitarbeiterListe = raw ? JSON.parse(raw) : []; }
+    catch(e){ mitarbeiterListe = []; }
+  }
+  function saveMitarbeiter(){
+    try{ localStorage.setItem(MITARBEITER_KEY, JSON.stringify(mitarbeiterListe)); }
+    catch(e){ showToast("Speichern fehlgeschlagen."); }
+  }
+  function persist(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs)); return true; }
+    catch(e){ showToast("Speichern fehlgeschlagen — Gerätespeicher evtl. voll."); return false; }
+  }
+
+  function showToast(msg){
+    let t = document.querySelector(".toast");
+    if(!t){ t = document.createElement("div"); t.className="toast"; document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(t._timer); t._timer = setTimeout(()=> t.classList.remove("show"), 2400);
+  }
+  function esc(s){ return (s||"").toString().replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+  function statusLabel(s){ return s==="offen" ? "Offen" : s==="arbeit" ? "In Arbeit" : "Erledigt"; }
+
+  // ---------- Backup ----------
+  function exportBackup(){
+    const blob = new Blob([JSON.stringify(jobs, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `bm-werkstatt-backup-${todayStr()}.json`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    showToast("Backup heruntergeladen.");
+  }
+  function importBackup(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const data = JSON.parse(reader.result);
+        if(!Array.isArray(data)) throw new Error("bad");
+        let added = 0;
+        const existingIds = new Set(jobs.map(j=>j.id));
+        data.forEach(j=>{
+          if(j && j.id && !existingIds.has(j.id)){ jobs.push(j); existingIds.add(j.id); added++; }
+        });
+        persist(); loadJobs(); renderList();
+        showToast(`Import fertig: ${added} Auftrag/Aufträge hinzugefügt.`);
+      }catch(e){ showToast("Import fehlgeschlagen — Datei ungültig."); }
+    };
+    reader.readAsText(file);
+  }
+
+  function jobTotals(job){
+    const hours = job.zeittabelle.reduce((s,r)=> s + (parseFloat((r.total||"").replace(",","."))||0), 0);
+    const material = job.material.reduce((s,r)=>{
+      const stk = parseFloat(r.stk)||0, preis = parseFloat(r.preis)||0;
+      return s + stk*preis;
+    },0);
+    return {hours, material};
+  }
+
+  // ---------- PRINT VIEW ----------
+  function pvField(label, value){
+    return `<div class="pv-field"><div class="pv-label">${esc(label)}</div><div class="pv-value">${esc(value) || "&nbsp;"}</div></div>`;
+  }
+  function buildPrintHTML(job){
+    const k = job.kunde, m = job.maschine;
+    const totals = jobTotals(job);
+    const dateStr = new Date(job.createdAt).toLocaleDateString("de-CH");
+    const zuErledigenLabel = (job.zuErledigen.mode==='am' ? 'am' : 'bis') + (job.zuErledigen.datum ? " " + new Date(job.zuErledigen.datum+"T00:00:00").toLocaleDateString("de-CH") : "");
+
+    const checklistHtml = CHECKLIST_ITEMS.map(item => `
+      <div class="pv-check-item ${job.checkliste[item] ? 'pv-checked':''}">
+        <span class="pv-check-box">${job.checkliste[item] ? '☑' : '☐'}</span><span>${esc(item)}</span>
+      </div>`).join("") + job.customChecks.filter(c=>c.label).map(c => `
+      <div class="pv-check-item ${c.checked ? 'pv-checked':''}">
+        <span class="pv-check-box">${c.checked ? '☑' : '☐'}</span><span>${esc(c.label)}</span>
+      </div>`).join("");
+
+    const zeitRowsHtml = job.zeittabelle.filter(r=> r.datum||r.total||r.monteur||r.km||r.ahk).map(r => `
+      <tr><td>${r.datum? new Date(r.datum+"T00:00:00").toLocaleDateString("de-CH"):"–"}</td><td>${esc(r.total)}</td><td>${esc(r.monteur)}</td><td>${esc(r.km)}</td><td>${esc(r.ahk)}</td></tr>`).join("");
+
+    const matRowsHtml = job.material.filter(r=> r.beschreibung || r.preis).map(r => {
+      const stk = parseFloat(r.stk)||0, preis = parseFloat(r.preis)||0, sub = stk*preis;
+      return `<tr><td>${esc(r.stk)}</td><td>${esc(r.beschreibung)}</td><td>${esc(r.ersatzteilNr)}</td><td>${preis? preis.toFixed(2):""}</td><td>${sub? sub.toFixed(2):""}</td></tr>`;
+    }).join("");
+
+    return `
+      <div class="pv-page">
+        <div class="pv-masthead">
+          <h1>2.1 Reparaturannahme</h1>
+          <div class="pv-meta">Auftrag ${esc(job.id)}<br>Erfasst am ${dateStr}<br><span class="pv-status">${statusLabel(job.status)}</span></div>
+        </div>
+
+        <div class="pv-section-title">Kunde</div>
+        <div class="pv-grid pv-cols2">
+          ${pvField("Firma", k.firma)}${pvField("Kontakt", k.kontakt)}
+          ${pvField("Strasse", k.strasse)}${pvField("Tel.", k.tel)}
+          ${pvField("Ort", k.ort)}${pvField("E-Mail", k.email)}
+          ${pvField("Zu erledigen", zuErledigenLabel)}${pvField("Annahme von", job.annahmeVon)}${pvField("Zugewiesen an", job.zugewiesenAn)}
+        </div>
+
+        <div class="pv-section-title">Maschine / Fahrzeug</div>
+        <div class="pv-grid">
+          ${pvField("Maschinen-Art", m.art)}${pvField("Inventar-Nr.", m.inventarNr)}${pvField("Marke", m.marke)}
+          ${pvField("Betriebs-Std.", m.betriebsStd)}${pvField("Typ", m.typ)}${pvField("Baujahr", m.baujahr)}
+          ${pvField("Chassis-Nr.", m.chassisNr)}${pvField("Kontrollschild", m.kontrollschild)}${pvField("Standort", m.standort)}
+        </div>
+
+        <div class="pv-section-title">Auszuführende Arbeiten</div>
+        <div class="pv-text-block">${esc(job.arbeitenAuszufuehren) || '<span class="pv-empty-note">Keine Angabe</span>'}</div>
+
+        <div class="pv-section-title">Bemerkungen</div>
+        <div class="pv-text-block">${esc(job.bemerkungenAnnahme) || '<span class="pv-empty-note">Keine Angabe</span>'}</div>
+      </div>
+
+      <div class="pv-page">
+        <div class="pv-masthead">
+          <h1>2.1 Reparaturauftrag</h1>
+          <div class="pv-meta">Auftrag ${esc(job.id)}<br>${esc(k.firma)}<br><span class="pv-status">${statusLabel(job.status)}</span></div>
+        </div>
+
+        <div class="pv-section-title">Ausgeführte Arbeiten</div>
+        <div class="pv-checklist">${checklistHtml}</div>
+
+        <div class="pv-section-title">Weitere Arbeiten</div>
+        <div class="pv-text-block">${esc(job.weitereArbeiten) || '<span class="pv-empty-note">Keine Angabe</span>'}</div>
+
+        <div class="pv-section-title">Zeiterfassung</div>
+        <table class="pv-table">
+          <thead><tr><th>Datum</th><th>A.-Total</th><th>Monteur</th><th>Km</th><th>AHK</th></tr></thead>
+          <tbody>${zeitRowsHtml || '<tr><td colspan="5" class="pv-empty-note">Keine Einträge</td></tr>'}</tbody>
+          <tfoot><tr><td colspan="1">Total</td><td>${totals.hours? totals.hours.toFixed(1)+" Std":""}</td><td colspan="3"></td></tr></tfoot>
+        </table>
+
+        <div class="pv-section-title">Material</div>
+        <table class="pv-table">
+          <thead><tr><th>Stk</th><th>Beschreibung</th><th>Ersatzteil-Nr.</th><th>Einzelpreis</th><th>Subtotal</th></tr></thead>
+          <tbody>${matRowsHtml || '<tr><td colspan="5" class="pv-empty-note">Keine Einträge</td></tr>'}</tbody>
+          <tfoot><tr><td colspan="4">Total Material</td><td>CHF ${totals.material.toFixed(2)}</td></tr></tfoot>
+        </table>
+
+        <div class="pv-section-title">Bemerkung</div>
+        <div class="pv-text-block">${esc(job.bemerkungAuftrag) || '<span class="pv-empty-note">Keine Angabe</span>'}</div>
+
+        <div class="pv-footer"><span>Ausgedruckt am ${new Date().toLocaleDateString("de-CH")} ${new Date().toLocaleTimeString("de-CH",{hour:'2-digit',minute:'2-digit'})}</span><span>BM-Werkstatt App</span></div>
+      </div>
+    `;
+  }
+  let printAlreadyPrepared = false;
+  function preparePrintView(job){
+    document.getElementById("printView").innerHTML = buildPrintHTML(job);
+    printAlreadyPrepared = true;
+  }
+  function printJobs(jobList){
+    if(!jobList || jobList.length===0){ showToast("Keine Aufträge zum Drucken."); return; }
+    document.getElementById("printView").innerHTML = jobList.map(j => buildPrintHTML(j)).join("");
+    printAlreadyPrepared = true;
+    window.print();
+  }
+
+  // ---------- RENDER: LIST ----------
+  function getFilteredJobs(){
+    return jobs.filter(j=>{
+      if(statusFilter!=="all" && j.status!==statusFilter) return false;
+      if(mitarbeiterFilter==="none" && j.zugewiesenAn) return false;
+      if(mitarbeiterFilter!=="all" && mitarbeiterFilter!=="none" && j.zugewiesenAn!==mitarbeiterFilter) return false;
+      if(!searchTerm) return true;
+      const hay = [j.kunde.firma, j.kunde.kontakt, j.maschine.art, j.maschine.marke, j.maschine.typ, j.maschine.inventarNr, j.maschine.standort, j.zugewiesenAn, j.id].join(" ").toLowerCase();
+      return hay.includes(searchTerm.toLowerCase());
+    }).sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
+  function renderList(){
+    const filtered = getFilteredJobs();
+
+    let rowsHtml = "";
+    if(filtered.length===0){
+      rowsHtml = `<div class="empty">
+        <div class="big">${jobs.length===0 ? "Noch keine Aufträge" : "Nichts gefunden"}</div>
+        <div>${jobs.length===0 ? "Tippen Sie auf „Neue Annahme“, um den ersten Auftrag zu erfassen." : "Suchbegriff oder Filter anpassen."}</div>
+      </div>`;
+    } else {
+      rowsHtml = filtered.map(j=>{
+        const stampClass = j.status==="offen" ? "offen" : j.status==="arbeit" ? "arbeit" : "fertig";
+        const dateStr = new Date(j.createdAt).toLocaleDateString("de-CH");
+        const t = jobTotals(j);
+        return `<div class="ticket" data-id="${j.id}">
+          <div class="ticket-top">
+            <div>
+              <div class="ticket-id">${j.id} · ${dateStr}</div>
+              <div class="ticket-firma">${esc(j.kunde.firma) || "Ohne Firma"}</div>
+              <div class="ticket-meta">${esc(j.maschine.art)} ${esc(j.maschine.marke)} ${esc(j.maschine.typ)}${j.maschine.standort? " · "+esc(j.maschine.standort):""}</div>
+              ${j.zugewiesenAn ? `<div class="ticket-assignee">👤 ${esc(j.zugewiesenAn)}</div>` : ""}
+            </div>
+            <div class="stamp ${stampClass}">${statusLabel(j.status)}</div>
+          </div>
+          ${j.arbeitenAuszufuehren ? `<div class="ticket-meta" style="color:var(--ink); margin-top:6px;">${esc(j.arbeitenAuszufuehren)}</div>` : ""}
+          <div class="ticket-progress" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <span>${t.hours? t.hours.toFixed(1)+" Std · ":""}CHF ${t.material.toFixed(2)} Material</span>
+            <button class="btn btn-outline btn-sm ticket-print-btn" data-print-id="${j.id}" style="flex-shrink:0;">Drucken</button>
+          </div>
+        </div>`;
+      }).join("");
+    }
+
+    const installBannerHtml = showInstallBanner ? `
+      <div class="install-banner">
+        <span>Als App installieren, damit sie ein eigenes Symbol auf dem Homescreen bekommt und offline läuft.</span>
+        <button class="btn btn-accent btn-sm" id="installBtn">Installieren</button>
+      </div>` : "";
+
+    const mitarbeiterPanelHtml = showMitarbeiterPanel ? `
+      <div class="install-banner" style="background:var(--surface); box-shadow:var(--shadow-sm); flex-direction:column; align-items:stretch;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <b style="font-size:14px;">Mitarbeiter verwalten</b>
+          <button class="btn btn-outline btn-sm" id="closeMitarbeiterPanel">Schliessen</button>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:${mitarbeiterListe.length?'12px':'0'};">
+          ${mitarbeiterListe.map(name => `
+            <span style="display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); padding:6px 10px; border-radius:999px; font-size:13px;">
+              ${esc(name)}
+              <button data-remove-mitarbeiter="${esc(name)}" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:15px; line-height:1; padding:0;">×</button>
+            </span>`).join("")}
+        </div>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="newMitarbeiterInput" placeholder="Name des Mitarbeiters" style="flex:1;">
+          <button class="btn btn-accent btn-sm" id="addMitarbeiterBtn">+ Hinzufügen</button>
+        </div>
+      </div>` : "";
+
+    app.innerHTML = `
+      <div class="topbar">
+        <div class="brand"><span class="brand-mark">BM</span><span class="brand-text">Werkstatt<small>Annahme &amp; Auftrag</small></span></div>
+        <div class="actions-row">
+          <button class="btn btn-ghost btn-sm" id="printListBtn">Drucken</button>
+          <button class="btn btn-accent" id="newJobTop">+ Neue Annahme</button>
+        </div>
+      </div>
+      <div class="wrap">
+        ${installBannerHtml}
+        ${mitarbeiterPanelHtml}
+        <div class="toolbar">
+          <input class="search" id="searchInput" type="text" placeholder="Suche: Firma, Maschine, Standort…" value="${esc(searchTerm)}">
+          <div class="segmented">
+            <button class="filter-chip ${statusFilter==='all'?'active':''}" data-f="all">Alle</button>
+            <button class="filter-chip ${statusFilter==='offen'?'active':''}" data-f="offen">Offen</button>
+            <button class="filter-chip ${statusFilter==='arbeit'?'active':''}" data-f="arbeit">In Arbeit</button>
+            <button class="filter-chip ${statusFilter==='fertig'?'active':''}" data-f="fertig">Erledigt</button>
+          </div>
+        </div>
+        <div class="toolbar" style="margin-top:-10px;">
+          <select id="mitarbeiterFilterSelect" style="max-width:220px;">
+            <option value="all" ${mitarbeiterFilter==='all'?'selected':''}>Alle Mitarbeiter</option>
+            <option value="none" ${mitarbeiterFilter==='none'?'selected':''}>Nicht zugewiesen</option>
+            ${mitarbeiterListe.map(name => `<option value="${esc(name)}" ${mitarbeiterFilter===name?'selected':''}>${esc(name)}</option>`).join("")}
+          </select>
+          <button class="btn btn-outline btn-sm" id="openMitarbeiterPanel">Mitarbeiter verwalten</button>
+        </div>
+        ${rowsHtml}
+        <div style="display:flex; gap:10px; margin-top:22px; flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" id="exportBtn">Backup exportieren</button>
+          <button class="btn btn-outline btn-sm" id="importBtn">Backup importieren</button>
+        </div>
+      </div>
+      <button class="btn btn-accent fab" id="newJobFab">+ Neue Annahme</button>
+    `;
+
+    document.getElementById("newJobTop").onclick = ()=> openNewJob();
+    document.getElementById("printListBtn").onclick = ()=> printJobs(getFilteredJobs());
+    document.getElementById("newJobFab").onclick = ()=> openNewJob();
+    document.getElementById("exportBtn").onclick = exportBackup;
+    document.getElementById("importBtn").onclick = ()=> document.getElementById("importFile").click();
+    document.getElementById("mitarbeiterFilterSelect").onchange = (e)=>{ mitarbeiterFilter = e.target.value; renderList(); };
+    document.getElementById("openMitarbeiterPanel").onclick = ()=>{ showMitarbeiterPanel = true; renderList(); };
+    const closePanelBtn = document.getElementById("closeMitarbeiterPanel");
+    if(closePanelBtn) closePanelBtn.onclick = ()=>{ showMitarbeiterPanel = false; renderList(); };
+    const addMitarbeiterBtn = document.getElementById("addMitarbeiterBtn");
+    if(addMitarbeiterBtn){
+      addMitarbeiterBtn.onclick = ()=>{
+        const input = document.getElementById("newMitarbeiterInput");
+        const name = (input.value||"").trim();
+        if(!name){ return; }
+        if(mitarbeiterListe.includes(name)){ showToast("Mitarbeiter existiert bereits."); return; }
+        mitarbeiterListe.push(name);
+        saveMitarbeiter();
+        renderList();
+      };
+    }
+    document.querySelectorAll("[data-remove-mitarbeiter]").forEach(b=>{
+      b.onclick = ()=>{
+        const name = b.dataset.removeMitarbeiter;
+        if(confirm(`"${name}" aus der Mitarbeiterliste entfernen?`)){
+          mitarbeiterListe = mitarbeiterListe.filter(n=>n!==name);
+          saveMitarbeiter();
+          if(mitarbeiterFilter===name) mitarbeiterFilter = "all";
+          renderList();
+        }
+      };
+    });
+    const installBtn = document.getElementById("installBtn");
+    if(installBtn){
+      installBtn.onclick = async ()=>{
+        if(deferredInstallPrompt){
+          deferredInstallPrompt.prompt();
+          await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null; showInstallBanner = false; renderList();
+        }
+      };
+    }
+    document.getElementById("searchInput").oninput = (e)=>{
+      searchTerm = e.target.value; renderList();
+      const el = document.getElementById("searchInput");
+      el.focus(); el.setSelectionRange(searchTerm.length, searchTerm.length);
+    };
+    document.querySelectorAll(".filter-chip").forEach(btn=>{ btn.onclick = ()=>{ statusFilter = btn.dataset.f; renderList(); }; });
+    document.querySelectorAll(".ticket").forEach(t=>{ t.onclick = ()=> openDetail(t.dataset.id); });
+    document.querySelectorAll(".ticket-print-btn").forEach(b=>{
+      b.onclick = (e)=>{
+        e.stopPropagation();
+        const job = jobs.find(j=>j.id===b.dataset.printId);
+        if(job) printJobs([job]);
+      };
+    });
+  }
+
+  function openNewJob(){
+    const job = blankJob();
+    jobs.unshift(job);
+    currentJobId = job.id; currentView = "detail";
+    renderDetail();
+  }
+  function openDetail(id){ currentJobId = id; currentView = "detail"; renderDetail(); }
+  function getJob(){ return jobs.find(j=>j.id===currentJobId); }
+
+  // ---------- RENDER: DETAIL ----------
+  function renderDetail(){
+    const job = getJob();
+    if(!job){ currentView="list"; renderList(); return; }
+    const k = job.kunde, m = job.maschine;
+    const totals = jobTotals(job);
+
+    const checklistHtml = `<div class="checklist-grid">` +
+      CHECKLIST_ITEMS.map(item => `
+        <label class="check-item ${job.checkliste[item] ? 'checked':''}" data-check-item="${esc(item)}">
+          <input type="checkbox" ${job.checkliste[item] ? 'checked':''}>
+          <span>${esc(item)}</span>
+        </label>`).join("") +
+      job.customChecks.map((c,i)=>`
+        <div class="custom-check-item">
+          <input type="checkbox" data-custom-check="${i}" ${c.checked?'checked':''}>
+          <input type="text" data-custom-label="${i}" placeholder="Eigener Punkt…" value="${esc(c.label)}">
+        </div>`).join("") +
+      `</div>`;
+
+    const zeitRows = job.zeittabelle.map((r,i)=>`
+      <tr data-idx="${i}">
+        <td><input type="date" class="zt-datum" value="${esc(r.datum)}" style="min-width:140px"></td>
+        <td><input type="text" class="zt-total" placeholder="Std" value="${esc(r.total)}" style="width:70px"></td>
+        <td><input type="text" class="zt-monteur" placeholder="Name" value="${esc(r.monteur)}" style="min-width:110px"></td>
+        <td><input type="text" class="zt-km" placeholder="Km" value="${esc(r.km)}" style="width:70px"></td>
+        <td><input type="text" class="zt-ahk" placeholder="AHK" value="${esc(r.ahk)}" style="width:70px"></td>
+        <td><button class="row-del" data-del-zeit="${i}" title="Zeile löschen">×</button></td>
+      </tr>`).join("");
+
+    const matRows = job.material.map((r,i)=>{
+      const stk = parseFloat(r.stk)||0, preis = parseFloat(r.preis)||0;
+      const sub = stk*preis;
+      return `
+      <tr data-idx="${i}">
+        <td><input type="text" class="mt-stk" value="${esc(r.stk)}" style="width:55px"></td>
+        <td><input type="text" class="mt-besch" placeholder="Beschreibung" value="${esc(r.beschreibung)}" style="min-width:140px"></td>
+        <td><input type="text" class="mt-etnr" placeholder="Ersatzteil-Nr." value="${esc(r.ersatzteilNr)}" style="width:120px"></td>
+        <td><input type="number" step="0.01" class="mt-preis" placeholder="0.00" value="${esc(r.preis)}" style="width:85px"></td>
+        <td style="font-family:var(--font-mono); white-space:nowrap; padding-left:8px;">${sub? sub.toFixed(2):"–"}</td>
+        <td><button class="row-del" data-del-mat="${i}" title="Zeile löschen">×</button></td>
+      </tr>`;
+    }).join("");
+
+    app.innerHTML = `
+      <div class="topbar">
+        <div class="brand"><span class="brand-mark">BM</span><span class="brand-text">Werkstatt<small>${job.id}</small></span></div>
+        <div class="actions-row"><button class="btn btn-ghost btn-sm" id="printBtn">Drucken</button></div>
+      </div>
+      <div class="wrap">
+        <div class="detail-header">
+          <button class="back-link" id="backBtn">← Zur Übersicht</button>
+          <div class="actions-row"><button class="btn btn-danger btn-sm" id="deleteJobBtn">Auftrag löschen</button></div>
+        </div>
+
+        <div class="status-bar">
+          <button class="status-btn sel-offen ${job.status==='offen'?'selected':''}" data-status="offen">Offen</button>
+          <button class="status-btn sel-arbeit ${job.status==='arbeit'?'selected':''}" data-status="arbeit">In Arbeit</button>
+          <button class="status-btn sel-fertig ${job.status==='fertig'?'selected':''}" data-status="fertig">Erledigt</button>
+        </div>
+
+        <div class="section">
+          <div class="section-head"><span class="section-num">2.1</span><span class="section-title">Reparaturannahme</span></div>
+          <div class="section-body">
+            <div class="subhead">Kunde</div>
+            <div class="grid">
+              <div class="field"><label>Firma</label><input type="text" id="k_firma" value="${esc(k.firma)}"></div>
+              <div class="field"><label>Kontakt</label><input type="text" id="k_kontakt" value="${esc(k.kontakt)}"></div>
+              <div class="field"><label>Strasse</label><input type="text" id="k_strasse" value="${esc(k.strasse)}"></div>
+              <div class="field"><label>Tel.</label><input type="tel" id="k_tel" value="${esc(k.tel)}"></div>
+              <div class="field"><label>Ort</label><input type="text" id="k_ort" value="${esc(k.ort)}"></div>
+              <div class="field"><label>E-Mail</label><input type="email" id="k_email" value="${esc(k.email)}"></div>
+            </div>
+            <div class="grid3">
+              <div class="field">
+                <label>Zu erledigen</label>
+                <div class="inline-date-choice">
+                  <label class="radio-opt"><input type="radio" name="zuErledigenMode" value="am" ${job.zuErledigen.mode==='am'?'checked':''}> am</label>
+                  <label class="radio-opt"><input type="radio" name="zuErledigenMode" value="bis" ${job.zuErledigen.mode==='bis'?'checked':''}> bis</label>
+                  <input type="date" id="zuErledigenDatum" value="${esc(job.zuErledigen.datum)}">
+                </div>
+              </div>
+              <div class="field"><label>Annahme von</label><input type="text" id="annahmeVon" value="${esc(job.annahmeVon)}"></div>
+              <div class="field">
+                <label>Zugewiesen an</label>
+                <select id="zugewiesenAn">
+                  <option value="" ${!job.zugewiesenAn?'selected':''}>— Kein Mitarbeiter —</option>
+                  ${mitarbeiterListe.map(name => `<option value="${esc(name)}" ${job.zugewiesenAn===name?'selected':''}>${esc(name)}</option>`).join("")}
+                  <option value="__new__">+ Neuer Mitarbeiter…</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="subhead">Maschine / Fahrzeug</div>
+            <div class="grid3">
+              <div class="field"><label>Maschinen-Art</label><input type="text" id="m_art" placeholder="z.B. Minibagger" value="${esc(m.art)}"></div>
+              <div class="field"><label>Inventar-Nr.</label><input type="text" id="m_inventarNr" value="${esc(m.inventarNr)}"></div>
+              <div class="field"><label>Marke</label><input type="text" id="m_marke" value="${esc(m.marke)}"></div>
+              <div class="field"><label>Betriebs-Std.</label><input type="text" id="m_betriebsStd" value="${esc(m.betriebsStd)}"></div>
+              <div class="field"><label>Typ</label><input type="text" id="m_typ" value="${esc(m.typ)}"></div>
+              <div class="field"><label>Baujahr</label><input type="text" id="m_baujahr" value="${esc(m.baujahr)}"></div>
+              <div class="field"><label>Chassis-Nr.</label><input type="text" id="m_chassisNr" value="${esc(m.chassisNr)}"></div>
+              <div class="field"><label>Kontrollschild</label><input type="text" id="m_kontrollschild" value="${esc(m.kontrollschild)}"></div>
+              <div class="field"><label>Standort</label><input type="text" id="m_standort" value="${esc(m.standort)}"></div>
+            </div>
+
+            <div class="field" style="margin-top:6px;"><label>Auszuführende Arbeiten</label><textarea id="arbeiten">${esc(job.arbeitenAuszufuehren)}</textarea></div>
+            <div class="field"><label>Bemerkungen</label><textarea id="bemerkungenAnnahme">${esc(job.bemerkungenAnnahme)}</textarea></div>
+            <button class="btn btn-accent" id="saveIntakeBtn">Annahme speichern</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head"><span class="section-num">2.1</span><span class="section-title">Reparaturauftrag</span></div>
+          <div class="section-body">
+            <div class="subhead">Ausgeführte Arbeiten</div>
+            ${checklistHtml}
+
+            <div class="subhead">Weitere Arbeiten</div>
+            <textarea id="weitereArbeiten" placeholder="Zusätzliche Arbeiten, die nicht in der Liste oben stehen…">${esc(job.weitereArbeiten)}</textarea>
+
+            <div class="subhead">Zeiterfassung</div>
+            <div class="table-scroll">
+              <table class="rows" id="zeitTable">
+                <thead><tr><th>Datum</th><th>A.-Total</th><th>Monteur</th><th>Km</th><th>AHK</th><th></th></tr></thead>
+                <tbody>${zeitRows}</tbody>
+              </table>
+            </div>
+            <button class="btn btn-outline btn-sm add-row-btn" id="addZeitRow">+ Zeile</button>
+            <div class="total-line"><span>Total Stunden:</span><b id="stdTotal">${totals.hours.toFixed(1)}</b></div>
+
+            <div class="subhead">Material</div>
+            <div class="table-scroll">
+              <table class="rows" id="matTable">
+                <thead><tr><th>Stk</th><th>Beschreibung</th><th>Ersatzteil-Nr.</th><th>Einzelpreis</th><th>Subtotal</th><th></th></tr></thead>
+                <tbody>${matRows}</tbody>
+              </table>
+            </div>
+            <button class="btn btn-outline btn-sm add-row-btn" id="addMatRow">+ Zeile</button>
+            <select id="matCatalogSelect" style="width:auto; display:inline-block; margin-left:8px; padding:9px 12px; font-size:13px;">
+              <option value="">+ Aus Liste wählen…</option>
+              ${Object.entries(MATERIAL_CATALOG).map(([cat, items]) => `
+                <optgroup label="${esc(cat)}">
+                  ${items.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join("")}
+                </optgroup>`).join("")}
+            </select>
+            <div class="total-line"><span>Total Material:</span><b id="matTotal">CHF ${totals.material.toFixed(2)}</b></div>
+
+            <div class="field" style="margin-top:16px;"><label>Bemerkung</label><textarea id="bemerkungAuftrag">${esc(job.bemerkungAuftrag)}</textarea></div>
+            <button class="btn btn-accent" id="saveAuftragBtn">Auftrag speichern</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    wireDetailEvents(job);
+  }
+
+  function wireDetailEvents(job){
+    document.getElementById("backBtn").onclick = ()=>{ currentView="list"; renderList(); };
+    document.getElementById("printBtn").onclick = ()=>{
+      collectIntakeIntoJob(job);
+      collectAuftragIntoJob(job);
+      preparePrintView(job);
+      window.print();
+    };
+    document.getElementById("deleteJobBtn").onclick = ()=>{
+      if(confirm("Diesen Auftrag unwiderruflich löschen?")){
+        jobs = jobs.filter(j=>j.id!==job.id);
+        persist(); currentView="list"; renderList(); showToast("Auftrag gelöscht.");
+      }
+    };
+    document.querySelectorAll(".status-btn").forEach(b=>{ b.onclick = ()=>{ job.status = b.dataset.status; renderDetail(); }; });
+
+    document.querySelectorAll("[data-check-item]").forEach(el=>{
+      el.querySelector("input").addEventListener("change", (e)=>{
+        job.checkliste[el.dataset.checkItem] = e.target.checked;
+        el.classList.toggle("checked", e.target.checked);
+      });
+    });
+
+    document.getElementById("addZeitRow").onclick = ()=>{
+      collectAuftragIntoJob(job);
+      job.zeittabelle.push({datum:"", total:"", monteur:"", km:"", ahk:""});
+      renderDetail();
+    };
+    document.getElementById("addMatRow").onclick = ()=>{
+      collectAuftragIntoJob(job);
+      job.material.push({stk:"", beschreibung:"", ersatzteilNr:"", preis:""});
+      renderDetail();
+    };
+    document.getElementById("matCatalogSelect").onchange = (e)=>{
+      const val = e.target.value;
+      if(!val) return;
+      collectAuftragIntoJob(job);
+      job.material.push({stk:"1", beschreibung:val, ersatzteilNr:"", preis:""});
+      renderDetail();
+    };
+    document.querySelectorAll("[data-del-zeit]").forEach(b=>{
+      b.onclick = ()=>{ collectAuftragIntoJob(job); job.zeittabelle.splice(parseInt(b.dataset.delZeit),1); renderDetail(); };
+    });
+    document.querySelectorAll("[data-del-mat]").forEach(b=>{
+      b.onclick = ()=>{ collectAuftragIntoJob(job); job.material.splice(parseInt(b.dataset.delMat),1); renderDetail(); };
+    });
+    document.querySelectorAll(".zt-total").forEach(inp=>{
+      inp.addEventListener("input", ()=>{
+        const hours = Array.from(document.querySelectorAll(".zt-total")).reduce((s,i)=> s + (parseFloat((i.value||"").replace(",","."))||0), 0);
+        document.getElementById("stdTotal").textContent = hours.toFixed(1);
+      });
+    });
+    document.querySelectorAll(".mt-stk, .mt-preis").forEach(inp=>{
+      inp.addEventListener("input", ()=>{
+        let total = 0;
+        document.querySelectorAll("#matTable tbody tr").forEach(tr=>{
+          const stk = parseFloat(tr.querySelector(".mt-stk").value)||0;
+          const preis = parseFloat(tr.querySelector(".mt-preis").value)||0;
+          const sub = stk*preis;
+          tr.children[4].textContent = sub ? sub.toFixed(2) : "–";
+          total += sub;
+        });
+        document.getElementById("matTotal").textContent = "CHF " + total.toFixed(2);
+      });
+    });
+
+    document.getElementById("zugewiesenAn").onchange = (e)=>{
+      if(e.target.value === "__new__"){
+        const name = (prompt("Name des neuen Mitarbeiters:")||"").trim();
+        if(name){
+          if(!mitarbeiterListe.includes(name)){ mitarbeiterListe.push(name); saveMitarbeiter(); }
+          job.zugewiesenAn = name;
+        }
+        renderDetail();
+      }
+    };
+
+    document.getElementById("saveIntakeBtn").onclick = ()=>{
+      collectIntakeIntoJob(job);
+      if(persist()) showToast("Annahme gespeichert.");
+    };
+    document.getElementById("saveAuftragBtn").onclick = ()=>{
+      collectAuftragIntoJob(job);
+      if(persist()) showToast("Auftrag gespeichert.");
+    };
+  }
+
+  function collectIntakeIntoJob(job){
+    const v = id => (document.getElementById(id)||{}).value ?? "";
+    job.kunde.firma = v("k_firma"); job.kunde.kontakt = v("k_kontakt"); job.kunde.strasse = v("k_strasse");
+    job.kunde.tel = v("k_tel"); job.kunde.ort = v("k_ort"); job.kunde.email = v("k_email");
+    const modeRadio = document.querySelector('input[name="zuErledigenMode"]:checked');
+    job.zuErledigen.mode = modeRadio ? modeRadio.value : job.zuErledigen.mode;
+    job.zuErledigen.datum = v("zuErledigenDatum");
+    job.annahmeVon = v("annahmeVon");
+    const zuweisungVal = v("zugewiesenAn");
+    if(zuweisungVal !== "__new__") job.zugewiesenAn = zuweisungVal;
+    job.maschine.art = v("m_art"); job.maschine.inventarNr = v("m_inventarNr"); job.maschine.marke = v("m_marke");
+    job.maschine.betriebsStd = v("m_betriebsStd"); job.maschine.typ = v("m_typ"); job.maschine.baujahr = v("m_baujahr");
+    job.maschine.chassisNr = v("m_chassisNr"); job.maschine.kontrollschild = v("m_kontrollschild"); job.maschine.standort = v("m_standort");
+    job.arbeitenAuszufuehren = v("arbeiten");
+    job.bemerkungenAnnahme = v("bemerkungenAnnahme");
+  }
+
+  function collectAuftragIntoJob(job){
+    document.querySelectorAll("[data-custom-check]").forEach(inp=>{
+      const i = parseInt(inp.dataset.customCheck);
+      if(job.customChecks[i]) job.customChecks[i].checked = inp.checked;
+    });
+    document.querySelectorAll("[data-custom-label]").forEach(inp=>{
+      const i = parseInt(inp.dataset.customLabel);
+      if(job.customChecks[i]) job.customChecks[i].label = inp.value;
+    });
+    const weitere = document.getElementById("weitereArbeiten");
+    if(weitere) job.weitereArbeiten = weitere.value;
+
+    const zt = [];
+    document.querySelectorAll("#zeitTable tbody tr").forEach(tr=>{
+      zt.push({
+        datum: tr.querySelector(".zt-datum").value,
+        total: tr.querySelector(".zt-total").value,
+        monteur: tr.querySelector(".zt-monteur").value,
+        km: tr.querySelector(".zt-km").value,
+        ahk: tr.querySelector(".zt-ahk").value,
+      });
+    });
+    if(zt.length) job.zeittabelle = zt;
+
+    const mat = [];
+    document.querySelectorAll("#matTable tbody tr").forEach(tr=>{
+      mat.push({
+        stk: tr.querySelector(".mt-stk").value,
+        beschreibung: tr.querySelector(".mt-besch").value,
+        ersatzteilNr: tr.querySelector(".mt-etnr").value,
+        preis: tr.querySelector(".mt-preis").value,
+      });
+    });
+    if(mat.length) job.material = mat;
+
+    const bem = document.getElementById("bemerkungAuftrag");
+    if(bem) job.bemerkungAuftrag = bem.value;
+  }
+
+  document.getElementById("importFile").addEventListener("change", (e)=>{
+    const file = e.target.files[0];
+    if(file) importBackup(file);
+    e.target.value = "";
+  });
+
+  window.addEventListener("beforeinstallprompt", (e)=>{
+    e.preventDefault(); deferredInstallPrompt = e; showInstallBanner = true;
+    if(currentView==="list") renderList();
+  });
+  window.addEventListener("appinstalled", ()=>{ showInstallBanner=false; deferredInstallPrompt=null; });
+
+  window.addEventListener("beforeprint", ()=>{
+    if(printAlreadyPrepared) return;
+    if(currentView==="detail" && currentJobId){
+      const job = getJob();
+      if(job){
+        collectIntakeIntoJob(job);
+        collectAuftragIntoJob(job);
+        preparePrintView(job);
+      }
+    } else if(currentView==="list"){
+      const filtered = getFilteredJobs();
+      if(filtered.length) document.getElementById("printView").innerHTML = filtered.map(j => buildPrintHTML(j)).join("");
+    }
+  });
+  window.addEventListener("afterprint", ()=>{ printAlreadyPrepared = false; });
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", ()=>{ navigator.serviceWorker.register("service-worker.js").catch(()=>{}); });
+  }
+
+  loadJobs();
+  loadMitarbeiter();
+  renderList();
+})();
+</script>
+</body>
+</html>
